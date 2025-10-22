@@ -9,7 +9,7 @@ import java.lang.reflect.Array;
 import javax.swing.Timer;
 import java.nio.channels.InterruptedByTimeoutException;
 
-public class IslandLakeSurvey implements Runnable{
+public class IslandLakeSurvey {
     public Partition<Coordinate> BP;
     public Partition<Coordinate> WP;
     public Node<Cluster<Coordinate>>[][] cluster;
@@ -20,8 +20,6 @@ public class IslandLakeSurvey implements Runnable{
     public Set<Coordinate> alreadyPartitioned;
     public int[][] clusterArray;
 
-    
-    
 
     public int rows;
     public int cols;
@@ -32,29 +30,32 @@ public class IslandLakeSurvey implements Runnable{
     private Tile[][] tiles;
     private final int DELAY = 2000;
     private final Color GREEN = new Color(0, 155, 0);
+    private final Color WHITE = new Color(255, 255, 255);
+    private final Color BLACK = new Color(0, 0, 0);
     private final Color BLUE = new Color(0, 0, 155);
     private final Color RED = new Color(255, 0, 0);
+    private final Color YELLOW = new Color(255, 255, 0);
 
 
     @SuppressWarnings("unchecked")
     public IslandLakeSurvey(Tile[][] tiles) {
         this.tiles = tiles;
-        BP = new Partition<Coordinate>();
-        WP = new Partition<Coordinate>();
+        this.BP = new Partition<Coordinate>();
+        this.WP = new Partition<Coordinate>();
 
-        rows = tiles.length;
-        cols = tiles[0].length;
+        this.rows = tiles.length;
+        this.cols = tiles[0].length;
 
-        cluster = (Node<Cluster<Coordinate>>[][]) Array.newInstance(Node.class, rows, cols);
-        lakeCluster = (Node<Cluster<Coordinate>>[][]) Array.newInstance(Node.class, rows, cols);
+        this.cluster = (Node<Cluster<Coordinate>>[][]) Array.newInstance(Node.class, rows, cols);
+        this.lakeCluster = (Node<Cluster<Coordinate>>[][]) Array.newInstance(Node.class, rows, cols);
 
-        clusterArray = new int[rows][cols];
-        alreadyPartitioned = new HashSet<>();
-        alreadyPartitionedLake = new HashSet<>();
-        lakes = new ArrayList<Node<Cluster<Coordinate>>>();
+        this.clusterArray = new int[rows][cols];
+        this.alreadyPartitioned = new HashSet<>();
+        this.alreadyPartitionedLake = new HashSet<>();
+        this.lakes = new ArrayList<Node<Cluster<Coordinate>>>();
     }
 
-    @Override
+    // @Override
     public void run() {
         System.out.println("start");
         findIslands();
@@ -90,13 +91,13 @@ public class IslandLakeSurvey implements Runnable{
             lakeArea += lakes.get(j).getElement().getSize();
         }
 
-
         System.out.println("Islands: " + BP.numberOfClusters());
         System.out.println("Largest island: " + BP.clusterSizes()[0]);
         System.out.println("Total island area (including lakes): " + BP.getArea());
         System.out.println("Lakes: " + lakes.size());
         System.out.println("Lake area: " + lakeArea);
         System.out.println("Bodies of water: " + WP.numberOfClusters());
+        System.out.println("Total water area: " + WP.getArea());
 
 
 
@@ -189,18 +190,19 @@ public class IslandLakeSurvey implements Runnable{
         // Place all 1's and 0's in to 2d integer array
 
         for (int row=0; row < rows; row++) {
-
             for (int col=0; col < cols; col++) {
                 n = grid[row][col];
                 clusterArray[row][col] = n;
 
                 if (n == 1) {
-                    cluster[row][col] = BP.makeCluster(new Coordinate(row, col));   
+                    cluster[row][col] = BP.makeCluster(new Coordinate(row, col));
+                    lakeCluster[row][col] = null;
                 }
 
 
                 else {
                     lakeCluster[row][col] = WP.makeCluster(new Coordinate(row, col));
+                    cluster[row][col] = null;
                 }
 
             }
@@ -225,6 +227,17 @@ public class IslandLakeSurvey implements Runnable{
         }
 
         System.out.println();
+    }
+
+    public void reset() {
+        BP.clear();
+        WP.clear();
+
+        alreadyPartitioned.clear();
+        alreadyPartitionedLake.clear();
+        lakes.clear();
+
+
     }
 
     public void updateLand(Coordinate c) {
@@ -254,6 +267,10 @@ public class IslandLakeSurvey implements Runnable{
         }
         
 
+    }
+
+    public void setTiles(Tile[][] tiles) {
+        this.tiles = tiles;
     }
 
     public void removeLand(Coordinate c) {
@@ -295,6 +312,7 @@ public class IslandLakeSurvey implements Runnable{
                 else {
                     searchForWater(i, j);
                 }
+
             }
 
         }
@@ -309,7 +327,7 @@ public class IslandLakeSurvey implements Runnable{
 
         while (h != null && index < lakes.size()) {
             BP.union(h, lakes.get(index));
-            BP.setClusterCount(BP.numberOfClusters() + 1); // Undo subtraction from BP.union because two land land clusters aren't being combined
+            BP.setClusterCount(BP.numberOfClusters() + 1); // Undo subtraction from BP.union because two land clusters aren't being combined
 
             index++;
             h = h.getNext();
@@ -405,6 +423,7 @@ public class IslandLakeSurvey implements Runnable{
                 if (current.getElement().getSize() >= top.getElement().getSize()) {
                     lakeCluster[i][j] = current;
                     lakeCluster[i-1][j] = current;
+
                 }
 
                 else {
@@ -714,9 +733,11 @@ public class IslandLakeSurvey implements Runnable{
                 }
 
                 // Recursively search where the new a water found, increasing the size of the water cluster if more is found
+                
                 searchForWater(i-1, j-1);
             
             }
+
         }
 
         Timer t = new Timer(DELAY, e -> {
@@ -729,6 +750,23 @@ public class IslandLakeSurvey implements Runnable{
 
     }
 
+
+    public void highlightUnion(Node<Cluster<Coordinate>> current, Node<Cluster<Coordinate>> adjacent) {
+        Node<Cluster<Coordinate>> h = current;
+
+
+        while (h != null) {
+            tiles[h.getElement().getHead().getElement().getRow()][h.getElement().getHead().getElement().getColumn()].setColor(RED);
+            h = h.getNext();
+        }
+
+        h = adjacent;
+
+        while (h != null) {
+            tiles[h.getElement().getHead().getElement().getRow()][h.getElement().getHead().getElement().getColumn()].setColor(YELLOW);
+            h = h.getNext();
+        }
+    }
 
 
     public void searchForLand(int i, int j) {
@@ -782,13 +820,13 @@ public class IslandLakeSurvey implements Runnable{
                     tiles[i-1][j].setColor(GREEN);
                 }
 
-                // Timer t = new Timer(1000, e -> {
-                //     searchForLand(i-1, j);
+                Timer t = new Timer(DELAY, e -> {
+                    searchForLand(i-1, j);
 
-                // });
+                });
 
-                // t.setRepeats(false);
-                // t.start();
+                t.setRepeats(false);
+                t.start();
                 // System.out.println("start");
 
                 
@@ -832,13 +870,13 @@ public class IslandLakeSurvey implements Runnable{
                     tiles[i+1][j].setColor(GREEN);
                 }
 
-                // Timer t = new Timer(1000, e -> {
-                //     searchForLand(i+1, j);
+                Timer t = new Timer(DELAY, e -> {
+                    searchForLand(i+1, j);
 
-                // });
+                });
 
-                // t.setRepeats(false);
-                // t.start();
+                t.setRepeats(false);
+                t.start();
             }
 
             
@@ -873,13 +911,13 @@ public class IslandLakeSurvey implements Runnable{
                     tiles[i][j-1].setColor(GREEN);
                 }
 
-                // Timer t = new Timer(1000, e -> {
-                //     searchForLand(i, j-1);
+                Timer t = new Timer(DELAY, e -> {
+                    searchForLand(i, j-1);
 
-                // });
+                });
 
-                // t.setRepeats(false);
-                // t.start();
+                t.setRepeats(false);
+                t.start();
             }
 
             
@@ -914,13 +952,13 @@ public class IslandLakeSurvey implements Runnable{
                     tiles[i][j+1].setColor(GREEN);
                 }
 
-                // Timer t = new Timer(1000, e -> {
-                //     searchForLand(i, j+1);
+                Timer t = new Timer(DELAY, e -> {
+                    searchForLand(i, j+1);
 
-                // });
+                });
 
-                // t.setRepeats(false);
-                // t.start();
+                t.setRepeats(false);
+                t.start();
             }
 
         }

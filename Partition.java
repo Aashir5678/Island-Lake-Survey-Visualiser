@@ -33,8 +33,8 @@ public class Partition<E> {
     }
 
     public void clear() {
-        head = tail = null;
-        clusterCount = 0;
+        this.head = this.tail = null;
+        this.clusterCount = 0;
     }
 
     public void setClusterCount(int clusterCount) {

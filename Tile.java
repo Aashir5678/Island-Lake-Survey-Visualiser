@@ -31,7 +31,7 @@ public class Tile {
     }
 
     public void setColor(Color c) {
-        Timer t = new Timer(500, e -> {
+        Timer t = new Timer(600, e -> {
             this.color = c;
         });
 
