@@ -5,14 +5,16 @@ import javax.swing.Timer;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.Random;
 import java.util.random.RandomGenerator;
 import java.awt.Color;
 
-class MapPanel extends JPanel implements Runnable {
+class MapPanel extends JPanel implements Runnable, KeyListener {
     private int[][] grid;
-    private final int DEFAULT_ROWS = 20;
-    private final int DEFAULT_COLS = 20;
+    private final int DEFAULT_ROWS = 50;
+    private final int DEFAULT_COLS = 50;
     private int rows;
     private int cols;
     private Tile[][] tiles;
@@ -21,24 +23,22 @@ class MapPanel extends JPanel implements Runnable {
     
     private final int screenWidth = 800;
     private final int screenHeight = 800;
-    private final int FPS = 120;
+    private final int FPS = 10000; // Higher FPS = repaint is happening more often = map is more accurate to what is going on in the survey in real time
     private final Color WHITE = new Color(255, 255, 255);
-    private final Color GREEN = new Color(0, 155, 0);
     private final Color BLACK = new Color(0, 0, 0);
-    private final Color BLUE = new Color(0, 0, 155);
     
     private int tileWidth;
     private int tileHeight;
     private boolean simulating = false;
 
-    KeyHandler keyhandler = new KeyHandler();
+
     MouseHandler mouseHandler = new MouseHandler();
 
     public MapPanel() throws Exception {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
         this.setBackground(WHITE);
         this.setDoubleBuffered(true);
-        this.addKeyListener(keyhandler);
+        this.addKeyListener(this);
         this.addMouseListener(mouseHandler);
         this.setFocusable(true);
 
@@ -106,13 +106,16 @@ class MapPanel extends JPanel implements Runnable {
         this.survey.populateClusterArray(grid);
         
 
-        Timer t = new Timer(1000, e -> {
-            this.survey.run();
-            this.simulating = false;
-        });
+        // Timer t = new Timer(5, e -> {
+        //     this.survey.run();
+        //     this.simulating = false;
+        // });
 
-        t.setRepeats(false);
-        t.start();
+        // t.setRepeats(false);
+        // t.start();
+
+        this.survey.run();
+        this.simulating = false;
 
         // simulating = false;
 
@@ -132,7 +135,7 @@ class MapPanel extends JPanel implements Runnable {
 
         while (running) {
             currentTime = (System.currentTimeMillis());
-            update();
+            // update();
             repaint();
 
             elapsedTime = (int) (System.currentTimeMillis() - currentTime);
@@ -146,13 +149,13 @@ class MapPanel extends JPanel implements Runnable {
 
                 // });
                 // timer.setRepeats(false);
-                // System.out.println("waiting " + ((1000 / FPS) - elapsedTime) + " mss");
-                // System.out.println("waiting " + (1000/FPS) - elapsedTime + " seconds");
-                // System.out.println("in time");
+                // // System.out.println("waiting " + ((1000 / FPS) - elapsedTime) + " mss");
+                // // System.out.println("waiting " + (1000/FPS) - elapsedTime + " seconds");
+                // // System.out.println("in time");
                 // timer.start();
 
                 try {
-                    Thread.sleep((1000 / FPS) - elapsedTime);
+                    Thread.sleep((1000/FPS) - elapsedTime);
                 }
 
                 catch (InterruptedException e) {
@@ -208,22 +211,39 @@ class MapPanel extends JPanel implements Runnable {
 
     }
 
-    public void update() {
-        if (keyhandler.space_presssed && !keyhandler.m_pressed && !simulating) {
-            runSimulation();
-        }
-
-        else if (keyhandler.m_pressed && !keyhandler.space_presssed && !simulating) {
-            reset();
-        }
-
-    }
-
     public int getScreenWidth() {
         return screenWidth;
     }
 
     public int getScreenHeight() {
         return screenHeight;
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+
+        // System.out.println(e.getKeyCode());
+        // System.out.println(KeyEvent.VK_M);
+        char key = e.getKeyChar();
+        
+        if (key == ' ' && !simulating) {
+            simulating = true;
+            runSimulation();
+        }
+
+        else if (key == 'm' && !simulating) {
+            System.out.println("here");
+            reset();
+        }
     }
 }

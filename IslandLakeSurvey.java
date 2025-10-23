@@ -28,13 +28,12 @@ public class IslandLakeSurvey {
     public int numCoordinates;
 
     private Tile[][] tiles;
-    private final int DELAY = 2000;
+    private final int DELAY_LAND = 1500;
     private final Color GREEN = new Color(0, 155, 0);
-    private final Color WHITE = new Color(255, 255, 255);
-    private final Color BLACK = new Color(0, 0, 0);
     private final Color BLUE = new Color(0, 0, 155);
     private final Color RED = new Color(255, 0, 0);
-    private final Color YELLOW = new Color(255, 255, 0);
+    private final Color DARK_BLUE = new Color(0, 0, 75);
+    private final Color DARK_GREEN = new Color(0, 50, 0);
 
 
     @SuppressWarnings("unchecked")
@@ -68,7 +67,7 @@ public class IslandLakeSurvey {
             }
 
             if (l.getElement().getSize() == 1) {
-                tiles[l.getElement().getHead().getElement().getRow()][l.getElement().getHead().getElement().getColumn()].setColor(BLUE);
+                tiles[l.getElement().getHead().getElement().getRow()][l.getElement().getHead().getElement().getColumn()].setColor(DARK_BLUE);
             }
         }
 
@@ -78,7 +77,7 @@ public class IslandLakeSurvey {
                     continue;
                 }
                 if (land.getElement().getSize() == 1) {
-                    tiles[land.getElement().getHead().getElement().getRow()][land.getElement().getHead().getElement().getColumn()].setColor(GREEN);
+                    tiles[land.getElement().getHead().getElement().getRow()][land.getElement().getHead().getElement().getColumn()].setColor(DARK_GREEN);
                 }
             }
         }
@@ -103,85 +102,6 @@ public class IslandLakeSurvey {
 
     }
 
-    // @SuppressWarnings("unchecked")
-    // public static void main(String[] args) throws Exception {
-
-    //     scanner = new Scanner(System.in);
-
-    //     rows = 0;
-    //     cols = 0;
-
-    //     if (scanner.hasNext()) {
-    //         String[] dimensions = (String[]) scanner.nextLine().split(" ");
-
-    //         rows = Integer.parseInt(dimensions[0]);
-    //         cols = Integer.parseInt(dimensions[1]);
-    //         cluster = (Node<Cluster<Coordinate>>[][]) Array.newInstance(Node.class, rows, cols);
-    //         lakeCluster = (Node<Cluster<Coordinate>>[][]) Array.newInstance(Node.class, rows, cols);
-
-    //         clusterArray = new int[rows][cols];
-    //         alreadyPartitioned = new HashSet<>();
-    //         alreadyPartitionedLake = new HashSet<>();
-    //         lakes = new ArrayList<Node<Cluster<Coordinate>>>();
-
-            
-
-    //         // populateClusterArray();
-
-
-    //         for (int i=0; i <= phases; i++) {
-    //             if (i > 0) { // Read for new coordinates only if 0th phase has passed
-    //                 // updateLand();
-
-    //             }
-
-    //             findIslands();
-
-                
-    //             System.out.println(BP.numberOfClusters()); // Number of island
-
-    //             if (BP.clusterSizes().length == 0) {
-    //                 System.out.println(-1);
-    //             }
-
-    //             else {
-    //                 // Print island sizes
-
-    //                 for (int size=0; size < BP.clusterSizes().length; size++) {
-    //                     if (size < BP.clusterSizes().length - 1) {
-    //                         System.out.print(BP.clusterSizes()[size] + " ");
-    //                     }
-
-    //                     else {
-    //                         System.out.print(BP.clusterSizes()[size]);
-    //                     }
-    //                 }
-
-    //                 System.out.println();
-    //             }
-
-    //             lakeArea = 0;
-
-    //             for (int j=0; j<lakes.size(); j++) {
-    //                 lakeArea += lakes.get(j).getElement().getSize();
-    //             }
-
-    //             area = BP.getArea();
-    //             System.out.println(area);
-    //             System.out.println(lakes.size());
-    //             System.out.println(lakeArea);
-
-
-    //             if (i < phases) {
-    //                 System.out.println();
-    //             }
-
-                
-    //         }
-
-    //     }
-
-    // }
 
     public void populateClusterArray(int[][] grid) {
         // int row = 0;
@@ -273,6 +193,25 @@ public class IslandLakeSurvey {
         this.tiles = tiles;
     }
 
+    public void delay() {
+        // try {
+        //     Thread.sleep(DELAY_LAND);
+        // }
+
+        // catch (InterruptedException e) {
+        //     ;
+        // }
+        // long time = System.currentTimeMillis();
+        
+        Timer t = new Timer(DELAY_LAND, e -> {
+            // System.out.println("actual time: " + (System.currentTimeMillis() - time));
+        });
+
+        t.setRepeats(false);
+        t.start();
+
+    }
+
     public void removeLand(Coordinate c) {
         // Reset the partition and alreadyPartitioned list to find any new islands
         BP.clear();
@@ -303,8 +242,10 @@ public class IslandLakeSurvey {
         */
 
         // Only continue searching adjacent elements in 2D matrix if the current element is land
+
         for (int i=0; i<rows; i++) {
             for (int j=0; j< cols; j++) {
+
                 if (cluster[i][j] != null) {
                     searchForLand(i, j);
                 }
@@ -415,6 +356,7 @@ public class IslandLakeSurvey {
 
             // Top is not null and the adjacent coordinate hasn't already been partitioned
             if (top != null && !(alreadyPartitionedLake.contains(new Coordinate(i-1, j)))) {
+                highlightWaterUnion(current, top);
                 WP.union(current, top);
 
                 
@@ -449,7 +391,14 @@ public class IslandLakeSurvey {
                 
 
                 // Recursively search where the new a water found, increasing the size of the water cluster if more is found
+                
+                // Timer t = new Timer(DELAY_WATER, e -> {
                 searchForWater(i-1, j);
+                // });
+
+                // t.setRepeats(false);
+                // t.start();
+
             }
 
             
@@ -464,6 +413,7 @@ public class IslandLakeSurvey {
 
             // Botom is not null and the adjacent coordinate hasn't already been partitioned
             if (bottom != null && !(alreadyPartitionedLake.contains(new Coordinate(i+1, j)))) {
+                highlightWaterUnion(current, bottom);
                 WP.union(current, bottom);
                 
 
@@ -491,8 +441,14 @@ public class IslandLakeSurvey {
                     tiles[i+1][j].setColor(BLUE);
                 }
 
-                // Recursively search where the new a water found, increasing the size of the water cluster if more is found
                 searchForWater(i+1, j);
+                // Recursively search where the new a water found, increasing the size of the water cluster if more is found
+                // Timer t = new Timer(DELAY_WATER, e -> {
+                //     searchForWater(i+1, j);
+                // });
+
+                // t.setRepeats(false);
+                // t.start();
             }
 
             
@@ -505,6 +461,7 @@ public class IslandLakeSurvey {
             left = lakeCluster[i][j-1];
 
             if (left != null && !(alreadyPartitionedLake.contains(new Coordinate(i, j-1)))) {
+                highlightWaterUnion(current, left);
                 WP.union(current, left);
                 
 
@@ -533,7 +490,12 @@ public class IslandLakeSurvey {
                 }
 
                 // Recursively search where the new a water found, increasing the size of the water cluster if more is found
+                // Timer t = new Timer(DELAY_WATER, e -> {
                 searchForWater(i, j-1);
+                // });
+
+                // t.setRepeats(false);
+                // t.start();
             }
 
             
@@ -546,6 +508,7 @@ public class IslandLakeSurvey {
 
             // Right is not null and the adjacent coordinate hasn't already been partitioned
             if (right != null && !(alreadyPartitionedLake.contains(new Coordinate(i, j+1)))) {
+                highlightWaterUnion(current, right);
                 WP.union(current, right);
                 
 
@@ -574,7 +537,12 @@ public class IslandLakeSurvey {
                 }
 
                 // Recursively search where the new a water found, increasing the size of the water cluster if more is found
+                // Timer t = new Timer(DELAY_WATER, e -> {
                 searchForWater(i, j+1);
+                // });
+
+                // t.setRepeats(false);
+                // t.start();
             
             }
         }
@@ -585,6 +553,7 @@ public class IslandLakeSurvey {
             topRight = lakeCluster[i-1][j + 1];
 
             if (topRight != null && !(alreadyPartitionedLake.contains(new Coordinate(i-1, j+1)))) {
+                highlightWaterUnion(current, topRight);
                 WP.union(current, topRight);
                 
 
@@ -613,7 +582,12 @@ public class IslandLakeSurvey {
                 }
 
                 // Recursively search where the new a water found, increasing the size of the water cluster if more is found
+                // Timer t = new Timer(DELAY_WATER, e -> {
                 searchForWater(i-1, j+1);
+                // });
+
+                // t.setRepeats(false);
+                // t.start();
             }
 
             
@@ -627,6 +601,7 @@ public class IslandLakeSurvey {
             bottomRight = lakeCluster[i+1][j+1];
 
             if (bottomRight != null && !(alreadyPartitionedLake.contains(new Coordinate(i+1, j+1)))) {
+                highlightWaterUnion(current, bottomRight);
                 WP.union(current, bottomRight);
                 
 
@@ -654,7 +629,12 @@ public class IslandLakeSurvey {
                 }
 
                 // Recursively search where the new a water found, increasing the size of the water cluster if more is found
-                searchForWater(i+1, j+1);
+                // Timer t = new Timer(DELAY_WATER, e -> {
+                    searchForWater(i+1, j+1);
+                // });
+
+                // t.setRepeats(false);
+                // t.start();
             }
 
             
@@ -667,6 +647,7 @@ public class IslandLakeSurvey {
             bottomLeft = lakeCluster[i+1][j-1];
 
             if (bottomLeft != null && !(alreadyPartitionedLake.contains(new Coordinate(i+1, j-1)))) {
+                highlightWaterUnion(current, bottomLeft);
                 WP.union(current, bottomLeft);
                 
 
@@ -694,7 +675,12 @@ public class IslandLakeSurvey {
                 }
 
                 // Recursively search where the new a water found, increasing the size of the water cluster if more is found
+                // Timer t = new Timer(DELAY_WATER, e -> {
                 searchForWater(i+1, j-1);
+                // });
+
+                // t.setRepeats(false);
+                // t.start();
             }
 
             
@@ -706,6 +692,7 @@ public class IslandLakeSurvey {
             topLeft = lakeCluster[i-1][j-1];
 
             if (topLeft != null && !(alreadyPartitionedLake.contains(new Coordinate(i-1, j-1)))) {
+                highlightWaterUnion(current, topLeft);
                 WP.union(current, topLeft);
                 
 
@@ -734,38 +721,37 @@ public class IslandLakeSurvey {
 
                 // Recursively search where the new a water found, increasing the size of the water cluster if more is found
                 
+                // Timer t = new Timer(DELAY_WATER, e -> {
                 searchForWater(i-1, j-1);
+                // });
+
+                // t.setRepeats(false);
+                // t.start();
             
             }
 
         }
 
-        Timer t = new Timer(DELAY, e -> {
-
-        });
-
-        t.setRepeats(false);
-        t.start();
+        delay();
 
 
     }
 
 
     public void highlightUnion(Node<Cluster<Coordinate>> current, Node<Cluster<Coordinate>> adjacent) {
-        Node<Cluster<Coordinate>> h = current;
+        tiles[current.getElement().getHead().getElement().getRow()][current.getElement().getHead().getElement().getColumn()].setColor(RED);
+        tiles[adjacent.getElement().getHead().getElement().getRow()][adjacent.getElement().getHead().getElement().getColumn()].setColor(RED);
 
+        tiles[current.getElement().getHead().getElement().getRow()][current.getElement().getHead().getElement().getColumn()].setColor(GREEN);
 
-        while (h != null) {
-            tiles[h.getElement().getHead().getElement().getRow()][h.getElement().getHead().getElement().getColumn()].setColor(RED);
-            h = h.getNext();
-        }
+    }
 
-        h = adjacent;
+    public void highlightWaterUnion(Node<Cluster<Coordinate>> current, Node<Cluster<Coordinate>> adjacent) {
+        tiles[current.getElement().getHead().getElement().getRow()][current.getElement().getHead().getElement().getColumn()].setColor(RED);
+        tiles[adjacent.getElement().getHead().getElement().getRow()][adjacent.getElement().getHead().getElement().getColumn()].setColor(RED);
 
-        while (h != null) {
-            tiles[h.getElement().getHead().getElement().getRow()][h.getElement().getHead().getElement().getColumn()].setColor(YELLOW);
-            h = h.getNext();
-        }
+        tiles[current.getElement().getHead().getElement().getRow()][current.getElement().getHead().getElement().getColumn()].setColor(BLUE);
+
     }
 
 
@@ -794,7 +780,9 @@ public class IslandLakeSurvey {
 
             // Top is not null and the adjacent coordinate hasn't already been partitioned
             if (top != null && !(alreadyPartitioned.contains(new Coordinate(i-1, j)))) {
+                highlightUnion(current, top);
                 BP.union(current, top);
+
                 
 
                 // Update reference to the node contained in cluster matrix, storing the one of non-zero size
@@ -815,18 +803,21 @@ public class IslandLakeSurvey {
                     alreadyPartitioned.add(new Coordinate(i, j));
                 }
 
+
                 if (!alreadyPartitioned.contains(new Coordinate(i-1, j))) {
                     alreadyPartitioned.add(new Coordinate(i-1, j));
                     tiles[i-1][j].setColor(GREEN);
                 }
 
-                Timer t = new Timer(DELAY, e -> {
-                    searchForLand(i-1, j);
 
-                });
 
-                t.setRepeats(false);
-                t.start();
+                // Timer t = new Timer(DELAY_LAND, e -> {
+                searchForLand(i-1, j);
+
+                // });
+
+                // t.setRepeats(false);
+                // t.start();
                 // System.out.println("start");
 
                 
@@ -848,6 +839,7 @@ public class IslandLakeSurvey {
 
             // Bottom is not null and at least one of the coordinates hasn't already been partitioned
             if (bottom != null && !(alreadyPartitioned.contains(new Coordinate(i+1, j)))) {
+                highlightUnion(current, bottom);
                 BP.union(current, bottom);
 
                 if (current.getElement().getSize() >= bottom.getElement().getSize()) {
@@ -870,13 +862,13 @@ public class IslandLakeSurvey {
                     tiles[i+1][j].setColor(GREEN);
                 }
 
-                Timer t = new Timer(DELAY, e -> {
-                    searchForLand(i+1, j);
+                // Timer t = new Timer(DELAY_LAND, e -> {
+                searchForLand(i+1, j);
 
-                });
+                // });
 
-                t.setRepeats(false);
-                t.start();
+                // t.setRepeats(false);
+                // t.start();
             }
 
             
@@ -889,7 +881,9 @@ public class IslandLakeSurvey {
 
             // Left is not null and at least one of the coordinates hasn't already been partitioned
             if (left != null && !(alreadyPartitioned.contains(new Coordinate(i, j-1)))) { 
+                highlightUnion(current, left);
                 BP.union(current, left);
+                
 
                 if (current.getElement().getSize() >= left.getElement().getSize()) {
                     cluster[i][j] = current;
@@ -911,13 +905,13 @@ public class IslandLakeSurvey {
                     tiles[i][j-1].setColor(GREEN);
                 }
 
-                Timer t = new Timer(DELAY, e -> {
-                    searchForLand(i, j-1);
+                // Timer t = new Timer(DELAY_LAND, e -> {
+                searchForLand(i, j-1);
 
-                });
+                // });
 
-                t.setRepeats(false);
-                t.start();
+                // t.setRepeats(false);
+                // t.start();
             }
 
             
@@ -930,7 +924,9 @@ public class IslandLakeSurvey {
 
             // Right is not null and at least one of the coordinates hasn't already been partitioned
             if (right != null && !(alreadyPartitioned.contains(new Coordinate(i, j+1)))) {
+                highlightUnion(current, right);
                 BP.union(current, right);
+                
 
                 if (current.getElement().getSize() >= right.getElement().getSize()) {
                     cluster[i][j] = current;
@@ -952,23 +948,18 @@ public class IslandLakeSurvey {
                     tiles[i][j+1].setColor(GREEN);
                 }
 
-                Timer t = new Timer(DELAY, e -> {
-                    searchForLand(i, j+1);
+                // Timer t = new Timer(DELAY_LAND, e -> {
+                searchForLand(i, j+1);
 
-                });
+                // });
 
-                t.setRepeats(false);
-                t.start();
+                // t.setRepeats(false);
+                // t.start();
             }
 
         }
 
-        Timer t = new Timer(DELAY, e -> {
-
-        });
-
-        t.setRepeats(false);
-        t.start();
+        delay();
 
 
 
