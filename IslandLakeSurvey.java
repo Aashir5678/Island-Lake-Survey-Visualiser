@@ -10,6 +10,9 @@ import javax.swing.Timer;
 import java.nio.channels.InterruptedByTimeoutException;
 
 public class IslandLakeSurvey {
+    public static int islandCount;
+    public static int lakeCount;
+
     public Partition<Coordinate> BP;
     public Partition<Coordinate> WP;
     public Node<Cluster<Coordinate>>[][] cluster;
@@ -28,7 +31,7 @@ public class IslandLakeSurvey {
     public int numCoordinates;
 
     private Tile[][] tiles;
-    private final int DELAY_LAND = 1500;
+    private final int DELAY_LAND = 1600; // 1600
     private final Color GREEN = new Color(0, 155, 0);
     private final Color BLUE = new Color(0, 0, 155);
     private final Color RED = new Color(255, 0, 0);
@@ -61,16 +64,22 @@ public class IslandLakeSurvey {
 
         // Fill in solo islands / lakes
 
-        for (Node<Cluster<Coordinate>> l : lakes) {
-            if (l == null) {
-                continue;
-            }
+        // for (Node<Cluster<Coordinate>> l : lakes) {
+        //     if (l == null) {
+        //         continue;
+        //     }
+            
+        //     // Node<Coordinate> n = l.getElement().getHead();
 
-            if (l.getElement().getSize() == 1) {
-                tiles[l.getElement().getHead().getElement().getRow()][l.getElement().getHead().getElement().getColumn()].setColor(DARK_BLUE);
-            }
-        }
+        //     // while (n != null) {
+        //     //     tiles[n.getElement().getRow()][n.getElement().getColumn()].setColor(DARK_BLUE);
+        //     //     n = n.getNext();
+        //     // }
 
+        //     tiles[l.getElement().getHead().getElement().getRow()][l.getElement().getHead().getElement().getColumn()].setColor(DARK_BLUE);
+        // }
+
+        // Fill in solo land and solo water
         for (int i=0; i < cluster.length; i++) {
             for (Node<Cluster<Coordinate>> land : cluster[i]) {
                 if (land == null) {
@@ -81,6 +90,24 @@ public class IslandLakeSurvey {
                 }
             }
         }
+
+        for (int i=0; i < lakeCluster.length; i++) {
+            for (Node<Cluster<Coordinate>> water : lakeCluster[i]) {
+                if (water == null) {
+                    continue;
+                }
+
+                if (water.getElement().getSize() == 1 && !lakes.contains(water)) {
+                    tiles[water.getElement().getHead().getElement().getRow()][water.getElement().getHead().getElement().getColumn()].setColor(BLUE);
+                }
+
+                else if (water.getElement().getSize() == 1 && lakes.contains(water)) {
+                    tiles[water.getElement().getHead().getElement().getRow()][water.getElement().getHead().getElement().getColumn()].setColor(DARK_BLUE);
+
+                }
+            }
+        }
+
         System.out.println("finish");
         System.out.println();
 
@@ -212,6 +239,7 @@ public class IslandLakeSurvey {
 
     }
 
+
     public void removeLand(Coordinate c) {
         // Reset the partition and alreadyPartitioned list to find any new islands
         BP.clear();
@@ -221,6 +249,7 @@ public class IslandLakeSurvey {
         alreadyPartitionedLake.clear();
         clusterArray[c.getRow()][c.getColumn()] = 0;
 
+        Tile.tilesTraversed = 0;
         lakes.clear();
 
         for (int i=0; i < cluster.length; i++) {
@@ -283,6 +312,7 @@ public class IslandLakeSurvey {
         while (node != null) {
             if (isLake(node)) {
                 lakes.add(node);
+                System.out.println();
             }
 
             node = node.getNext();
@@ -630,7 +660,7 @@ public class IslandLakeSurvey {
 
                 // Recursively search where the new a water found, increasing the size of the water cluster if more is found
                 // Timer t = new Timer(DELAY_WATER, e -> {
-                    searchForWater(i+1, j+1);
+                searchForWater(i+1, j+1);
                 // });
 
                 // t.setRepeats(false);
@@ -744,6 +774,14 @@ public class IslandLakeSurvey {
 
         tiles[current.getElement().getHead().getElement().getRow()][current.getElement().getHead().getElement().getColumn()].setColor(GREEN);
 
+        Timer t = new Timer(2500, e -> { // 2500
+            Tile.tilesTraversed -= 3;
+            
+        });
+
+        t.setRepeats(false);
+        t.start();
+
     }
 
     public void highlightWaterUnion(Node<Cluster<Coordinate>> current, Node<Cluster<Coordinate>> adjacent) {
@@ -751,6 +789,15 @@ public class IslandLakeSurvey {
         tiles[adjacent.getElement().getHead().getElement().getRow()][adjacent.getElement().getHead().getElement().getColumn()].setColor(RED);
 
         tiles[current.getElement().getHead().getElement().getRow()][current.getElement().getHead().getElement().getColumn()].setColor(BLUE);
+
+        Timer t = new Timer(2500, e -> { // 2500
+            Tile.tilesTraversed -= 3;
+            
+        });
+        t.setRepeats(false);
+
+        t.start();
+        
 
     }
 

@@ -15,15 +15,17 @@ class MapPanel extends JPanel implements Runnable, KeyListener {
     private int[][] grid;
     private final int DEFAULT_ROWS = 50;
     private final int DEFAULT_COLS = 50;
+    private final double LAND_RATIO = 0.4;
     private int rows;
     private int cols;
     private Tile[][] tiles;
     private IslandLakeSurvey survey;
+    private SurveyStats stats;
 
     
-    private final int screenWidth = 800;
+    private final int screenWidth = 1200;
     private final int screenHeight = 800;
-    private final int FPS = 10000; // Higher FPS = repaint is happening more often = map is more accurate to what is going on in the survey in real time
+    private final int FPS = 10000; // 10000, Higher FPS = repaint is happening more often = map is more accurate to what is going on in the survey in real time
     private final Color WHITE = new Color(255, 255, 255);
     private final Color BLACK = new Color(0, 0, 0);
     
@@ -181,7 +183,13 @@ class MapPanel extends JPanel implements Runnable, KeyListener {
         for (int i=0; i < DEFAULT_ROWS; i++) {
             for (int j=0; j < DEFAULT_COLS; j++) {
                 
-                randGrid[i][j] = gen.nextInt(0, 2);
+                if (LAND_RATIO > gen.nextFloat(0, 1)) {
+                    randGrid[i][j] = 1;
+                }
+
+                else {
+                    randGrid[i][j] = 0;
+                }
                 System.out.print(randGrid[i][j] + " ");
             }
             System.out.println();
@@ -194,6 +202,7 @@ class MapPanel extends JPanel implements Runnable, KeyListener {
     }
 
     public void paintComponent(Graphics g) {
+        // System.out.println("here");
         Graphics2D g2d = (Graphics2D) g;
 
         for (int i=0; i < this.rows; i++) {
@@ -202,12 +211,14 @@ class MapPanel extends JPanel implements Runnable, KeyListener {
             }
         }
 
-        Timer t = new Timer(500, e -> {
+        stats.paintComponent(g2d);
 
-        });
+        // Timer t = new Timer(500, e -> {
 
-        t.setRepeats(false);
-        t.start();
+        // });
+
+        // t.setRepeats(false);
+        // t.start();
 
     }
 
@@ -245,5 +256,13 @@ class MapPanel extends JPanel implements Runnable, KeyListener {
             System.out.println("here");
             reset();
         }
+    }
+
+    public void setStats(SurveyStats stats) {
+        this.stats = stats;
+    }
+
+    public int getTilesTraversed() {
+        return Tile.tilesTraversed;
     }
 }

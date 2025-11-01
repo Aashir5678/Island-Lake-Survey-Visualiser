@@ -30,6 +30,9 @@ public class Main {
         
         window.add(map);
         // window.add(stats);
+
+        map.setStats(stats);
+        
         window.pack();
 
         window.setTitle("Survey");

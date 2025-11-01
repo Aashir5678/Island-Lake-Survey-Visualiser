@@ -4,13 +4,14 @@ import java.awt.Graphics2D;
 import javax.swing.Timer;
 
 public class Tile {
+    public static int tilesTraversed = 0;
     private int x;
     private int y;
     private int width;
     private int height;
     private Color color;
     private final Color BLACK = new Color(0, 0, 0);
-    private final int BORDER_SIZE = 1;
+    private final int BORDER_SIZE = 4;
 
     public Tile(int x, int y, int width, int height, Color color) {
         this.x = x;
@@ -32,8 +33,10 @@ public class Tile {
 
     public void setColor(Color c) {
 
-        Timer t = new Timer(2500, e -> {
+        Timer t = new Timer(2500, e -> { // 2500
             this.color = c;
+            tilesTraversed++;
+            
         });
 
         t.setRepeats(false);
