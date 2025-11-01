@@ -10,3 +10,10 @@ Water is represented by 0. A body of water contains 2 or more 0's touching at an
 
 Lakes are bodies of water encompassed on all 4 sides and 4 corners by land.
 
+## The UI
+
+Once the survey has started, it will look for water that is adjacent to other pieces of water. The blue tiles are water, green is land.
+The blinking red tile and the other red tile indicate the two tiles that are being unioned together to form one island / body of water.
+At the end of the survey, the solo islands are filled in dark green, and the solo lakes are filled dark blue
+
+
