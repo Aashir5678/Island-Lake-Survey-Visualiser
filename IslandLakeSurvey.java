@@ -6,6 +6,9 @@ import java.util.Set;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.lang.reflect.Array;
+
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import java.nio.channels.InterruptedByTimeoutException;
 
@@ -31,7 +34,7 @@ public class IslandLakeSurvey {
     public int numCoordinates;
 
     private Tile[][] tiles;
-    private final int DELAY_LAND = 1600; // 1600
+    private final int DELAY_LAND = 3000; // 1600
     private final Color GREEN = new Color(0, 155, 0);
     private final Color BLUE = new Color(0, 0, 155);
     private final Color RED = new Color(255, 0, 0);
@@ -274,7 +277,6 @@ public class IslandLakeSurvey {
 
         for (int i=0; i<rows; i++) {
             for (int j=0; j< cols; j++) {
-
                 if (cluster[i][j] != null) {
                     searchForLand(i, j);
                 }
@@ -282,6 +284,8 @@ public class IslandLakeSurvey {
                 else {
                     searchForWater(i, j);
                 }
+
+                
 
             }
 
@@ -774,7 +778,7 @@ public class IslandLakeSurvey {
 
         tiles[current.getElement().getHead().getElement().getRow()][current.getElement().getHead().getElement().getColumn()].setColor(GREEN);
 
-        Timer t = new Timer(2500, e -> { // 2500
+        Timer t = new Timer(Tile.DELAY, e -> { // 2500
             Tile.tilesTraversed -= 3;
             
         });
@@ -790,7 +794,7 @@ public class IslandLakeSurvey {
 
         tiles[current.getElement().getHead().getElement().getRow()][current.getElement().getHead().getElement().getColumn()].setColor(BLUE);
 
-        Timer t = new Timer(2500, e -> { // 2500
+        Timer t = new Timer(Tile.DELAY, e -> { // 2500
             Tile.tilesTraversed -= 3;
             
         });

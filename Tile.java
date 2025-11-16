@@ -5,6 +5,8 @@ import javax.swing.Timer;
 
 public class Tile {
     public static int tilesTraversed = 0;
+    public static int DELAY = 100;
+
     private int x;
     private int y;
     private int width;
@@ -32,8 +34,7 @@ public class Tile {
     }
 
     public void setColor(Color c) {
-
-        Timer t = new Timer(2500, e -> { // 2500
+        Timer t = new Timer(DELAY, e -> { // Set higher when there are more tiles
             this.color = c;
             tilesTraversed++;
             

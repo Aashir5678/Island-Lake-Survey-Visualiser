@@ -1,5 +1,6 @@
 
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import java.awt.Dimension;
@@ -13,8 +14,8 @@ import java.awt.Color;
 
 class MapPanel extends JPanel implements Runnable, KeyListener {
     private int[][] grid;
-    private final int DEFAULT_ROWS = 50;
-    private final int DEFAULT_COLS = 50;
+    private final int DEFAULT_ROWS = 20;
+    private final int DEFAULT_COLS = 20;
     private final double LAND_RATIO = 0.4;
     private int rows;
     private int cols;
@@ -23,9 +24,9 @@ class MapPanel extends JPanel implements Runnable, KeyListener {
     private SurveyStats stats;
 
     
-    private final int screenWidth = 1200;
-    private final int screenHeight = 800;
-    private final int FPS = 10000; // 10000, Higher FPS = repaint is happening more often = map is more accurate to what is going on in the survey in real time
+    private final int screenWidth = 1000;
+    private final int screenHeight = 700;
+    private final int FPS = Integer.MAX_VALUE; // 10000, Higher FPS = repaint is happening more often = map is more accurate to what is going on in the survey in real time
     private final Color WHITE = new Color(255, 255, 255);
     private final Color BLACK = new Color(0, 0, 0);
     
@@ -81,6 +82,7 @@ class MapPanel extends JPanel implements Runnable, KeyListener {
     public void reset() {
         grid = generateRandomGrid();
         this.survey.reset();
+        Tile.tilesTraversed = 0;
 
         for (int i = 0; i < grid.length; i++) {
             for (int j=0; j < grid[0].length; j++) {
@@ -137,14 +139,10 @@ class MapPanel extends JPanel implements Runnable, KeyListener {
 
         while (running) {
             currentTime = (System.currentTimeMillis());
-            // update();
             repaint();
 
             elapsedTime = (int) (System.currentTimeMillis() - currentTime);
 
-            if (elapsedTime == 0) {
-                continue;
-            }
 
             if ((1000/FPS) - elapsedTime > 0) {
                 // timer = new Timer((1000/FPS) - elapsedTime,  e -> {
