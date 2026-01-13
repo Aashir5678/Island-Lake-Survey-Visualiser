@@ -1,7 +1,9 @@
 # Island-Lake-Survey-Visualiser
 I visualised one of my assignments using Java Swing.
 
-Run `java Main.java` and press space to start the simulation. Press m to randomize the map.
+Run `java Main.java` or `java Main` and press space to start the simulation. Press m to randomize the map.
+
+Adjust DELAY in Tile.java and DELAY_LAND in IslandLakeSurvey.java to adjust how fast / slow the algorithm runs
 
 ## How islands and lakes are defined
 Piece's of land are represented as 1. For two pieces of land to be part of the same island, they must touch at an adjacent side (left, right, top, bottom).
